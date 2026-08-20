@@ -47,7 +47,9 @@ const submit = () => {
                 :disabled="form.processing"
             >
                 <Spinner v-if="form.processing" class="mr-2" />
-                {{ form.processing ? 'Sending to your email' : 'Send OTP code' }}
+                {{
+                    form.processing ? 'Sending to your email' : 'Send OTP code'
+                }}
             </Button>
         </div>
     </form>
