@@ -85,8 +85,9 @@ class OtpController extends Controller
         ]);
 
         $cachedOtp = Cache::get('otp_code_'.$email);
+        $otp = $request->otp;
 
-        if ($request->otp !== $cachedOtp) {
+        if (!($cachedOtp && Hash::check($otp, $cachedOtp))) {
             return back()->withErrors(['otp' => 'Invalid OTP code.']);
         }
 
