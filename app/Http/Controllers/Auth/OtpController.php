@@ -98,6 +98,10 @@ class OtpController extends Controller
         session()->forget('otp_email');
         Cache::forget('otp_code_'.$email);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $route = $user->role === 'admin'
+            ? route('admin.index', absolute: false)
+            : route('dashboard', absolute: false);
+
+        return redirect()->intended(route($route));
     }
 }
