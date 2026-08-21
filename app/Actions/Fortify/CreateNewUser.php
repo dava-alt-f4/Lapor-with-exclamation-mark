@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Concerns\AddressValidationRules;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
@@ -10,7 +11,7 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
 {
-    use PasswordValidationRules, ProfileValidationRules;
+    use AddressValidationRules, PasswordValidationRules, ProfileValidationRules;
 
     /**
      * Validate and create a newly registered user.
@@ -21,6 +22,7 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             ...$this->profileRules(),
+            ...$this->addressRules(),
             'password' => $this->passwordRules(),
         ])->validate();
 
@@ -28,6 +30,10 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'country' => $input['country'],
+            'province' => $input['province'],
+            'city' => $input['city'],
+            'district' => $input['district'],
         ]);
     }
 }

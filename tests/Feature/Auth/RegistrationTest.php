@@ -18,6 +18,10 @@ test('new users can register', function () {
         'email' => 'test@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'country' => 'Indonesia',
+        'province' => 'Jawa Barat',
+        'city' => 'Bandung',
+        'district' => 'Coblong',
     ]);
 
     $this->assertAuthenticated();
