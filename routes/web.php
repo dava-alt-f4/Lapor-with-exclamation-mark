@@ -1,8 +1,14 @@
 <?php
 
+use App\Actions\Fortify\CreateNewUser;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\OtpController;
+use App\Http\Requests\Auth\RegisterRequest;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Responses\RegisterResponse;
 
 Route::inertia('/', 'Welcome')->name('home');
 
@@ -26,4 +32,13 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
 });
+
+// Register
+Route::post('/register', function (RegisterRequest $request, CreateNewUser $creator) {
+    event(new Registered($user = $creator->create($request->all())));
+    Auth::login($user);
+
+    return app(RegisterResponse::class);
+})->middleware(['guest', HandlePrecognitiveRequests::class])->name('register.store');
+
 require __DIR__.'/settings.php';

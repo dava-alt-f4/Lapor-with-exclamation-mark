@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
+import { useForm } from 'laravel-precognition-vue';
 import { ref, watch, onMounted } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -21,7 +22,7 @@ defineOptions({
 
 const currentStep = ref(1);
 
-const form = useForm({
+const form = useForm('post', '/register', {
     name: '',
     email: '',
     password: '',
@@ -31,6 +32,7 @@ const form = useForm({
     city: '',
     district: '',
 });
+form.setValidationTimeout(0);
 
 // Api
 const provinces = ref<Array<{ id: string; name: string }>>([]);
@@ -44,14 +46,12 @@ const selectedDistrictId = ref('');
 // Frontend Validation Errors
 const step1Errors = ref({
     name: '',
-    email: '',
     password: '',
     password_confirmation: '',
 });
 
 const touched = ref({
     name: false,
-    email: false,
     password: false,
     password_confirmation: false,
 });
@@ -65,14 +65,6 @@ const validateField = (field: Step1Field) => {
         step1Errors.value.name = !form.name.trim()
             ? 'Full Name is required.'
             : '';
-    } else if (field === 'email') {
-        if (!form.email.trim()) {
-            step1Errors.value.email = 'Email Address is required.';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-            step1Errors.value.email = 'Please enter a valid email address.';
-        } else {
-            step1Errors.value.email = '';
-        }
     } else if (field === 'password') {
         if (!form.password) {
             step1Errors.value.password = 'Password is required.';
@@ -108,6 +100,44 @@ const handleInput = (field: Step1Field) => {
     touched.value[field] = true;
     clearTimeout(debounceTimers[field]);
     debounceTimers[field] = setTimeout(() => validateField(field), 1000);
+};
+
+const emailValidationPending = ref(false);
+const emailDebounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
+
+const validateEmail = (onValid?: () => void) => {
+    emailValidationPending.value = true;
+
+    form.validate('email', {
+        onSuccess: () => {
+            emailValidationPending.value = false;
+            onValid?.();
+        },
+        onValidationError: () => {
+            emailValidationPending.value = false;
+        },
+        onFinish: () => {
+            emailValidationPending.value = false;
+        },
+    });
+};
+
+const handleEmailInput = () => {
+    if (emailDebounceTimer.value) {
+        clearTimeout(emailDebounceTimer.value);
+    }
+
+    emailDebounceTimer.value = setTimeout(() => {
+        validateEmail();
+    }, 500);
+};
+
+const handleEmailBlur = () => {
+    if (emailDebounceTimer.value) {
+        clearTimeout(emailDebounceTimer.value);
+    }
+
+    validateEmail();
 };
 
 const step2Errors = ref({
@@ -201,27 +231,17 @@ const nextStep = () => {
     let isValid = true;
     touched.value = {
         name: true,
-        email: true,
         password: true,
         password_confirmation: true,
     };
     step1Errors.value = {
         name: '',
-        email: '',
         password: '',
         password_confirmation: '',
     };
 
     if (!form.name.trim()) {
         step1Errors.value.name = 'Full Name is required.';
-        isValid = false;
-    }
-
-    if (!form.email.trim()) {
-        step1Errors.value.email = 'Email Address is required.';
-        isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-        step1Errors.value.email = 'Please enter a valid email address.';
         isValid = false;
     }
 
@@ -242,9 +262,15 @@ const nextStep = () => {
         isValid = false;
     }
 
-    if (isValid) {
-        currentStep.value = 2;
+    if (!isValid) {
+        return;
     }
+
+    validateEmail(() => {
+        if (!form.invalid('email')) {
+            currentStep.value = 2;
+        }
+    });
 };
 
 const prevStep = () => {
@@ -276,7 +302,7 @@ const validateStep2AndProceed = () => {
 };
 
 const submit = () => {
-    form.post('/register', {
+    form.submit({
         onSuccess: () => form.reset('password', 'password_confirmation'),
     });
 };
@@ -387,6 +413,7 @@ const submit = () => {
         <!-- STEP 1 -->
         <form
             v-show="currentStep === 1"
+            novalidate
             @submit.prevent="nextStep"
             class="flex flex-col gap-6"
         >
@@ -425,18 +452,13 @@ const submit = () => {
                         autocomplete="email"
                         placeholder="email@example.com"
                         :class="
-                            step1Errors.email
+                            form.invalid('email')
                                 ? 'border-red-500 focus-visible:ring-red-500'
                                 : ''
                         "
-                        @blur="handleBlur('email')"
-                        @input="handleInput('email')"
+                        @input="handleEmailInput"
+                        @blur="handleEmailBlur"
                     />
-                    <span
-                        v-if="step1Errors.email"
-                        class="text-sm font-medium text-red-500"
-                        >{{ step1Errors.email }}</span
-                    >
                     <InputError :message="form.errors.email" />
                 </div>
 
