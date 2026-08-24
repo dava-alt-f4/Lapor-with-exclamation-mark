@@ -194,7 +194,6 @@ watch(selectedDistrictId, (districtId) => {
 
     addressValues.value.district = district?.name || '';
 });
-
 </script>
 
 <template>
@@ -222,10 +221,26 @@ watch(selectedDistrictId, (districtId) => {
             class="space-y-6"
             v-slot="{ errors, processing }"
         >
-            <input type="hidden" name="country" :value="addressValues.country" />
-            <input type="hidden" name="province" :value="addressValues.province || ''" />
-            <input type="hidden" name="city" :value="addressValues.city || ''" />
-            <input type="hidden" name="district" :value="addressValues.district || ''" />
+            <input
+                type="hidden"
+                name="country"
+                :value="addressValues.country"
+            />
+            <input
+                type="hidden"
+                name="province"
+                :value="addressValues.province || ''"
+            />
+            <input
+                type="hidden"
+                name="city"
+                :value="addressValues.city || ''"
+            />
+            <input
+                type="hidden"
+                name="district"
+                :value="addressValues.district || ''"
+            />
 
             <div class="grid gap-2">
                 <Label for="country">Country</Label>
@@ -247,7 +262,11 @@ watch(selectedDistrictId, (districtId) => {
                     class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <option value="">Select province</option>
-                    <option v-for="province in provinces" :key="province.id" :value="province.id">
+                    <option
+                        v-for="province in provinces"
+                        :key="province.id"
+                        :value="province.id"
+                    >
                         {{ province.name }}
                     </option>
                 </select>
@@ -263,7 +282,11 @@ watch(selectedDistrictId, (districtId) => {
                     class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <option value="">Select city or regency</option>
-                    <option v-for="city in cities" :key="city.id" :value="city.id">
+                    <option
+                        v-for="city in cities"
+                        :key="city.id"
+                        :value="city.id"
+                    >
                         {{ city.name }}
                     </option>
                 </select>
@@ -279,7 +302,11 @@ watch(selectedDistrictId, (districtId) => {
                     class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <option value="">Select district</option>
-                    <option v-for="district in districts" :key="district.id" :value="district.id">
+                    <option
+                        v-for="district in districts"
+                        :key="district.id"
+                        :value="district.id"
+                    >
                         {{ district.name }}
                     </option>
                 </select>
