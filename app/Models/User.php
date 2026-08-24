@@ -27,10 +27,23 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'role', 'country', 'province', 'city', 'district'])]
+#[Fillable(['name', 'email', 'password', 'role', 'country', 'province', 'city', 'district', 'avatar'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
+    /**
+     * @var array<int, string>
+     */
+    protected $appends = ['avatar_url'];
+
+    /**
+     * Get the public URL for the user's avatar.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar === null ? null : url('/storage/'.$this->avatar);
+    }
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 

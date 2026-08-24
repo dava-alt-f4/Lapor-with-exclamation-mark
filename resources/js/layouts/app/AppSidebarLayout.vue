@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
     <AppShell variant="sidebar">
-        <AppSidebar :main-nav-items="props.mainNavItems"/>
+        <AppSidebar :main-nav-items="props.mainNavItems" />
         <AppContent variant="sidebar" class="overflow-x-hidden">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
             <slot />

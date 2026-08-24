@@ -45,6 +45,17 @@ const user = computed(() => page.props.auth.user);
             v-slot="{ errors, processing }"
         >
             <div class="grid gap-2">
+                <Label for="avatar">Profile picture</Label>
+                <Input
+                    id="avatar"
+                    type="file"
+                    name="avatar"
+                    accept="image/jpeg,image/png,image/webp"
+                />
+                <InputError class="mt-2" :message="errors.avatar" />
+            </div>
+
+            <div class="grid gap-2">
                 <Label for="name">Name</Label>
                 <Input
                     id="name"
