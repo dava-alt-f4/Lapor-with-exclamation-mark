@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { dashboard } from '@/routes/admin';
+import { LayoutDashboard } from '@lucide/vue';
+import { NavItem } from '@/types';
 
 defineProps<{
     users: Array<{
@@ -31,10 +33,17 @@ defineOptions({
         {
             breadcrumbs: [
                 {
-                    title: 'Dashboard Admin',
+                    title: 'Admin Dashboard',
                     href: dashboard(),
                 },
             ],
+            mainNavItems: [
+                {
+                    title: 'Admin Dashboard',
+                    href: dashboard(),
+                    icon: LayoutDashboard,
+                },
+            ] satisfies NavItem[],
         },
     ],
 });

@@ -17,13 +17,20 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+const props = withDefaults(
+    defineProps<{
+        mainNavItems?: NavItem[];
+    }>(),
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        mainNavItems: () => [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: LayoutGrid,
+            },
+        ],
     },
-];
+);
 
 const footerNavItems: NavItem[] = [];
 </script>
@@ -43,7 +50,7 @@ const footerNavItems: NavItem[] = [];
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="props.mainNavItems" />
         </SidebarContent>
 
         <SidebarFooter>
