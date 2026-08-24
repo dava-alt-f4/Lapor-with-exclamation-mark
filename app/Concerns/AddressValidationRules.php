@@ -11,7 +11,7 @@ trait AddressValidationRules
      *
      * @return array<string, array<int, ValidationRule|array<mixed>|string>>
      */
-    protected function addressRules(): array
+    protected function addressRules(?int $userId = null): array
     {
         return [
             'country' => $this->countryRules(),
