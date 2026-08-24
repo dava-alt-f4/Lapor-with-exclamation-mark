@@ -19,7 +19,7 @@ class AdminController extends Controller
     {
         $users = User::latest()->get();
 
-        return Inertia::render('admin/Index', [
+        return Inertia::render('admin/Dashboard', [
             'users' => $users,
         ]);
     }

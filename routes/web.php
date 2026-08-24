@@ -27,7 +27,7 @@ Route::middleware('guest')->group(function () {
 
 // Admin
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('index');
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::post('/users', [AdminController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');

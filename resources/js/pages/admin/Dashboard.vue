@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
-import { index } from '@/routes/admin';
+import { dashboard } from '@/routes/admin';
 
 defineProps<{
     users: Array<{
@@ -32,7 +32,7 @@ defineOptions({
             breadcrumbs: [
                 {
                     title: 'Dashboard Admin',
-                    href: index(),
+                    href: dashboard(),
                 },
             ],
         },
