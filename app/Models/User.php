@@ -31,9 +31,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
-    /**
-     * @var array<int, string>
-     */
     protected $appends = ['avatar_url'];
 
     /**

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { LayoutDashboard } from '@lucide/vue';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -15,8 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { dashboard } from '@/routes/admin';
-import { LayoutDashboard } from '@lucide/vue';
-import { NavItem } from '@/types';
+import type { NavItem } from '@/types';
 
 defineProps<{
     users: Array<{

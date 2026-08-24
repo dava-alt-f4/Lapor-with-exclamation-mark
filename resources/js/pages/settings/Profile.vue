@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { Form, Head, usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { Camera } from '@lucide/vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useInitials } from '@/composables/useInitials';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 
@@ -25,6 +28,38 @@ defineOptions({
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const avatarInput = ref<HTMLInputElement | null>(null);
+const avatarPreview = ref<string | null>(null);
+const { getInitials } = useInitials();
+
+const avatarSource = computed(
+    () => avatarPreview.value ?? user.value.avatar_url ?? null,
+);
+
+const openAvatarPicker = () => {
+    avatarInput.value?.click();
+};
+
+const updateAvatarPreview = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (avatarPreview.value) {
+        URL.revokeObjectURL(avatarPreview.value);
+    }
+
+    avatarPreview.value = URL.createObjectURL(file);
+};
+
+onBeforeUnmount(() => {
+    if (avatarPreview.value) {
+        URL.revokeObjectURL(avatarPreview.value);
+    }
+});
 </script>
 
 <template>
@@ -44,16 +79,44 @@ const user = computed(() => page.props.auth.user);
             class="space-y-6"
             v-slot="{ errors, processing }"
         >
-            <div class="grid gap-2">
-                <Label for="avatar">Profile picture</Label>
-                <Input
+            <div class="flex items-center gap-4">
+                <Avatar class="size-20 rounded-full">
+                    <AvatarImage
+                        v-if="avatarSource"
+                        :src="avatarSource"
+                        :alt="user.name"
+                    />
+                    <AvatarFallback class="text-lg font-semibold">
+                        {{ getInitials(user.name) }}
+                    </AvatarFallback>
+                </Avatar>
+
+                <div class="grid gap-2">
+                    <Label for="avatar" class="text-sm font-medium"
+                        >Profile picture</Label
+                    >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        class="w-fit"
+                        @click="openAvatarPicker"
+                    >
+                        <Camera class="size-4" />
+                        Change picture
+                    </Button>
+                </div>
+
+                <input
                     id="avatar"
                     type="file"
                     name="avatar"
                     accept="image/jpeg,image/png,image/webp"
+                    class="sr-only"
+                    ref="avatarInput"
+                    @change="updateAvatarPreview"
                 />
-                <InputError class="mt-2" :message="errors.avatar" />
             </div>
+            <InputError class="mt-2" :message="errors.avatar" />
 
             <div class="grid gap-2">
                 <Label for="name">Name</Label>
