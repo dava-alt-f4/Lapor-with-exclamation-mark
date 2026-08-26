@@ -43,7 +43,11 @@ const footerNavItems: NavItem[] = [];
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="props.homeHref ?? props.mainNavItems?.[0]?.href">
+                        <Link
+                            :href="
+                                props.homeHref ?? props.mainNavItems?.[0]?.href
+                            "
+                        >
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

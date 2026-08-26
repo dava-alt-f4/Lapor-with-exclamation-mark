@@ -4,10 +4,7 @@ import { computed } from 'vue';
 import type { Component } from 'vue';
 import AppHeaderLayout from '@/layouts/app/AppHeaderLayout.vue';
 import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
-import {
-    getMainNavItems,
-    getNavigationHomeHref,
-} from '@/lib/navigation';
+import { getMainNavItems, getNavigationHomeHref } from '@/lib/navigation';
 import type { BreadcrumbItem, NavItem, NavigationContext } from '@/types';
 
 type Props = {
