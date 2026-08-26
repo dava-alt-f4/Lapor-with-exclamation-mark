@@ -30,7 +30,7 @@ class FortifyServiceProvider extends ServiceProvider
                 {
                     $user = Auth::user();
                     $route = $user->role === 'admin'
-                        ? route('admin.index', absolute: false)
+                        ? route('admin.dashboard', absolute: false)
                         : route('dashboard', absolute: false);
 
                     return redirect()->intended($route);
