@@ -40,10 +40,20 @@ import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
+    mainNavItems?: NavItem[];
+    homeHref?: NavItem['href'];
 };
 
 const props = withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
+    mainNavItems: () => [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: LayoutGrid,
+            },
+        ],
+    homeHref: () => dashboard(),
 });
 
 const page = usePage();
@@ -52,14 +62,6 @@ const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
 
 const rightNavItems: NavItem[] = [];
 </script>
@@ -135,7 +137,7 @@ const rightNavItems: NavItem[] = [];
                     </Sheet>
                 </div>
 
-                <Link :href="dashboard()" class="flex items-center gap-x-2">
+                <Link :href="props.homeHref" class="flex items-center gap-x-2">
                     <AppLogo />
                 </Link>
 

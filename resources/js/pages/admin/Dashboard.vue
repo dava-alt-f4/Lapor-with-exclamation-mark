@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { LayoutDashboard } from '@lucide/vue';
 import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -14,9 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import AppSidebarLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { dashboard } from '@/routes/admin';
-import type { NavItem } from '@/types';
 
 defineProps<{
     users: Array<{
@@ -28,24 +25,14 @@ defineProps<{
 }>();
 
 defineOptions({
-    layout: [
-        AppSidebarLayout,
-        {
-            breadcrumbs: [
-                {
-                    title: 'Admin Dashboard',
-                    href: dashboard(),
-                },
-            ],
-            mainNavItems: [
-                {
-                    title: 'Admin Dashboard',
-                    href: dashboard(),
-                    icon: LayoutDashboard,
-                },
-            ] satisfies NavItem[],
-        },
-    ],
+    layout: {
+        breadcrumbs: [
+            {
+                title: 'Admin Dashboard',
+                href: dashboard(),
+            },
+        ],
+    },
 });
 
 const page = usePage();

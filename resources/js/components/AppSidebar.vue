@@ -20,6 +20,7 @@ import type { NavItem } from '@/types';
 const props = withDefaults(
     defineProps<{
         mainNavItems?: NavItem[];
+        homeHref?: NavItem['href'];
     }>(),
     {
         mainNavItems: () => [
@@ -29,6 +30,7 @@ const props = withDefaults(
                 icon: LayoutGrid,
             },
         ],
+        homeHref: undefined,
     },
 );
 
@@ -41,7 +43,7 @@ const footerNavItems: NavItem[] = [];
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="props.homeHref ?? props.mainNavItems?.[0]?.href">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

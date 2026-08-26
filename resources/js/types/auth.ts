@@ -6,7 +6,7 @@ export type User = {
     avatar_url?: string | null;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
-    role: string;
+    role: 'admin' | 'user';
     created_at: string;
     updated_at: string;
     [key: string]: unknown;

@@ -3,20 +3,28 @@ import AppContent from '@/components/AppContent.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import AppShell from '@/components/AppShell.vue';
 import { Toaster } from '@/components/ui/sonner';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
+    mainNavItems?: NavItem[];
+    homeHref?: NavItem['href'];
 };
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
+    mainNavItems: () => [],
+    homeHref: undefined,
 });
 </script>
 
 <template>
     <AppShell variant="header">
-        <AppHeader :breadcrumbs="breadcrumbs" />
+        <AppHeader
+            :main-nav-items="props.mainNavItems"
+            :breadcrumbs="breadcrumbs"
+            :home-href="props.homeHref"
+        />
         <AppContent variant="header">
             <slot />
         </AppContent>

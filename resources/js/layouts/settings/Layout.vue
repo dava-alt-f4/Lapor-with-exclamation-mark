@@ -4,31 +4,8 @@ import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
+import { settingsNavItems } from '@/lib/navigation';
 import { toUrl } from '@/lib/utils';
-import { edit as editAddress } from '@/routes/address';
-import { edit as editAppearance } from '@/routes/appearance';
-import { edit as editProfile } from '@/routes/profile';
-import { edit as editSecurity } from '@/routes/security';
-import type { NavItem } from '@/types';
-
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: editProfile(),
-    },
-    {
-        title: 'Address',
-        href: editAddress(),
-    },
-    {
-        title: 'Security',
-        href: editSecurity(),
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-    },
-];
 
 const { isCurrentOrParentUrl } = useCurrentUrl();
 </script>
@@ -47,7 +24,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                     aria-label="Settings"
                 >
                     <Button
-                        v-for="item in sidebarNavItems"
+                        v-for="item in settingsNavItems"
                         :key="toUrl(item.href)"
                         variant="ghost"
                         :class="[
