@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { useForm } from 'laravel-precognition-vue';
 import { ref, watch, onMounted } from 'vue';
 import InputError from '@/components/InputError.vue';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { dashboard } from '@/routes';
 
 defineProps<{
     passwordRules: string;
@@ -105,12 +106,13 @@ const handleInput = (field: Step1Field) => {
 const emailValidationPending = ref(false);
 const emailDebounceTimer = ref<ReturnType<typeof setTimeout> | null>(null);
 
-const validateEmail = (onValid?: () => void) => {
+const validateEmail = (onValid?: () => void, force = false) => {
     emailValidationPending.value = true;
 
-    form.validate('email', {
-        onSuccess: () => {
+    const options = {
+        onPrecognitionSuccess: () => {
             emailValidationPending.value = false;
+            form.forgetError('email');
             onValid?.();
         },
         onValidationError: () => {
@@ -119,7 +121,16 @@ const validateEmail = (onValid?: () => void) => {
         onFinish: () => {
             emailValidationPending.value = false;
         },
-    });
+    };
+
+    if (force) {
+        form.validate({
+            only: ['email'],
+            ...options,
+        });
+    } else {
+        form.validate('email', options);
+    }
 };
 
 const handleEmailInput = () => {
@@ -267,10 +278,9 @@ const nextStep = () => {
     }
 
     validateEmail(() => {
-        if (!form.invalid('email')) {
-            currentStep.value = 2;
-        }
-    });
+        // console.log('moving to step 2');
+        currentStep.value = 2;
+    }, true);
 };
 
 const prevStep = () => {
@@ -303,7 +313,10 @@ const validateStep2AndProceed = () => {
 
 const submit = () => {
     form.submit({
-        onSuccess: () => form.reset('password', 'password_confirmation'),
+        onSuccess: () => {
+            form.reset('password', 'password_confirmation');
+            router.visit(dashboard.url());
+        },
     });
 };
 </script>
