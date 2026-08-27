@@ -1,7 +1,23 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '@/components/PlaceholderPattern.vue';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { useEcho } from '@laravel/echo-vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { dashboard } from '@/routes';
+import { store as chatStore } from '@/actions/App/Http/Controllers/ChatController';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Send } from '@lucide/vue';
+
+const props = defineProps<{
+    conversation: { id: number };
+    messages: Array<{
+        id: number;
+        body: string;
+        sender_id: number;
+        created_at: string;
+        sender: { name: string; role: string; avatar_url: string | null };
+    }>;
+}>();
 
 defineOptions({
     layout: {
@@ -13,35 +29,99 @@ defineOptions({
         ],
     },
 });
+
+const page = usePage();
+const currentUser = page.props.auth.user;
+const messagesList = ref([...props.messages]);
+const messagesContainer = ref<HTMLElement | null>(null);
+
+const form = useForm({
+    body: '',
+});
+
+const scrollToBottom = () => {
+    nextTick(() => {
+        if (messagesContainer.value) {
+            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+        }
+    });
+};
+
+watch(() => props.messages, (newMessages) => {
+    messagesList.value = [...newMessages];
+    scrollToBottom();
+}, { deep: true });
+
+onMounted(() => {
+    scrollToBottom();
+});
+
+useEcho(`conversation.${props.conversation.id}`, '.MessageSent', (e: any) => {
+    messagesList.value.push(e);
+    scrollToBottom();
+});
+
+const submit = () => {
+    if (!form.body.trim()) return;
+
+    form.post(chatStore.url(), {
+        preserveScroll: true,
+        onSuccess: () => {
+            form.reset();
+            scrollToBottom();
+        },
+    });
+};
 </script>
 
 <template>
     <Head title="Dashboard" />
 
-    <div
-        class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
-    >
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
+    <div class="flex h-[calc(100vh-8rem)] flex-col rounded-xl border border-sidebar-border/70 bg-sidebar shadow-sm dark:border-sidebar-border">
+        <!-- Chat Header -->
+        <div class="flex items-center border-b border-sidebar-border/70 p-4">
+            <h2 class="text-lg font-semibold">Chat with Admin</h2>
+        </div>
+
+        <!-- Messages Area -->
+        <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div v-if="messagesList.length === 0" class="flex h-full items-center justify-center text-muted-foreground">
+                No messages yet. Start the conversation!
             </div>
+
             <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                v-for="message in messagesList"
+                :key="message.id"
+                :class="[
+                    'flex w-max max-w-[75%] flex-col gap-1 rounded-lg px-4 py-2 text-sm',
+                    message.sender_id === currentUser.id
+                        ? 'ml-auto bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                ]"
             >
-                <PlaceholderPattern />
-            </div>
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
+                <!-- Nama pengirim sudah dihapus -->
+                <div>{{ message.body }}</div>
+                <div class="text-[10px] opacity-50 text-right mt-1">
+                    {{ new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                </div>
             </div>
         </div>
-        <div
-            class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
-        >
-            <PlaceholderPattern />
+
+        <!-- Message Input -->
+        <div class="border-t border-sidebar-border/70 p-4">
+            <form @submit.prevent="submit" class="flex gap-2">
+                <Input
+                    v-model="form.body"
+                    placeholder="Type your message..."
+                    class="flex-1"
+                    :disabled="form.processing"
+                    autocomplete="off"
+                />
+                <Button type="submit" :disabled="form.processing || !form.body.trim()">
+                    <Send class="h-4 w-4" />
+                    <span class="sr-only">Send</span>
+                </Button>
+            </form>
         </div>
     </div>
 </template>

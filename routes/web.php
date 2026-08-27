@@ -2,18 +2,23 @@
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\InboxController;
 use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\ChatController;
 use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Responses\RegisterResponse;
+use Illuminate\Support\Facades\Http;
+
 
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', [ChatController::class, 'index'])->name('dashboard');
+    Route::post('dashboard', [ChatController::class, 'store'])->name('chat.store');
 });
 
 // Otp
@@ -31,6 +36,10 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/users', [AdminController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/inbox', [InboxController::class, 'index'])->name('inbox.index');
+    Route::get('/inbox/{conversation}', [InboxController::class, 'show'])->name('inbox.show');
+    Route::post('/inbox/{conversation}', [InboxController::class, 'store'])->name('inbox.store');
 });
 
 // Register
