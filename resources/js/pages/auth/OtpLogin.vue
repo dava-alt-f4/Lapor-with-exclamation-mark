@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
+import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { register } from '@/routes';
 
 defineOptions({
     layout: {
@@ -51,6 +53,11 @@ const submit = () => {
                     form.processing ? 'Sending to your email' : 'Send OTP code'
                 }}
             </Button>
+        </div>
+
+        <div class="text-center text-sm text-muted-foreground">
+            Don't have an account?
+            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
         </div>
     </form>
 </template>

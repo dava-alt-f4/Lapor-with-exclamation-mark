@@ -4,11 +4,12 @@ import { useForm } from 'laravel-precognition-vue';
 import { ref, watch, onMounted } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { dashboard } from '@/routes';
+import { dashboard, login } from '@/routes';
 
 defineProps<{
     passwordRules: string;
@@ -765,5 +766,9 @@ const submit = () => {
                 </Button>
             </div>
         </form>
+        <div class="mt-3 text-center text-sm text-muted-foreground">
+            Already have an account?
+            <TextLink :href="login()" :tabindex="5">Sign In</TextLink>
+        </div>
     </div>
 </template>

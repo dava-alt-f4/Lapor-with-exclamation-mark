@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
+import { login } from '@/routes/otp';
 import { request } from '@/routes/password';
 
 defineOptions({
@@ -102,9 +103,19 @@ defineProps<{
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
-            Don't have an account?
-            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+        <div
+            class="flex flex-col gap-2 text-center text-sm text-muted-foreground"
+        >
+            <div>
+                Don't want to use a password?
+                <TextLink :href="login()" :tabindex="5"
+                    >Log in with OTP</TextLink
+                >
+            </div>
+            <div>
+                Don't have an account?
+                <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+            </div>
         </div>
     </Form>
 </template>
