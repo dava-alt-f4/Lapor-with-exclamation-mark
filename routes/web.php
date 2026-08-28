@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/users', [AdminController::class, 'store'])->name('users.store');
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('users.destroy');
+    Route::get('/users/{user}/detail', [AdminController::class, 'show'])->name('users.show');
 
     Route::get('/inbox', [InboxController::class, 'index'])->name('inbox.index');
     Route::get('/inbox/{conversation}', [InboxController::class, 'show'])->name('inbox.show');

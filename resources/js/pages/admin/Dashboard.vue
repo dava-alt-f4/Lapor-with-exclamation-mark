@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { show as adminUserShow } from '@/actions/App/Http/Controllers/Admin/AdminController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -180,6 +181,11 @@ const deleteUser = (id: number) => {
                                 </span>
                             </td>
                             <td class="space-x-2 px-6 py-4 text-right">
+                                <Button variant="ghost" size="sm" as-child>
+                                    <Link :href="adminUserShow(user.id)">
+                                        View
+                                    </Link>
+                                </Button>
                                 <Button
                                     variant="outline"
                                     size="sm"

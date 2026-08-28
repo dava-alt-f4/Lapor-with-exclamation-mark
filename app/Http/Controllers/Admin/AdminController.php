@@ -42,6 +42,18 @@ class AdminController extends Controller
     }
 
     /**
+     * Tampilkan detail user
+     */
+    public function show(User $user): Response
+    {
+        $user = User::findOrFail($user->id);
+
+        return Inertia::render('admin/UserDetail', [
+            'user' => $user,
+        ]);
+    }
+
+    /**
      * Perbarui data user
      */
     public function update(Request $request, User $user): RedirectResponse

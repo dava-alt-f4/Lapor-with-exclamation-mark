@@ -61,6 +61,39 @@ test('admin can view specific conversation', function () {
     $response->assertOk();
 });
 
+test('admin can view user details', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $user = User::factory()->create([
+        'name' => 'Jane User',
+        'email' => 'jane@example.com',
+        'country' => 'Indonesia',
+        'province' => 'West Java',
+        'city' => 'Bandung',
+        'district' => 'Coblong',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.show', $user))
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/UserDetail')
+            ->where('user.id', $user->id)
+            ->where('user.name', 'Jane User')
+            ->where('user.email', 'jane@example.com')
+            ->where('user.country', 'Indonesia')
+            ->where('user.province', 'West Java')
+            ->where('user.city', 'Bandung')
+            ->where('user.district', 'Coblong'));
+});
+
+test('non-admin cannot view user details', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    $targetUser = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('admin.users.show', $targetUser))
+        ->assertForbidden();
+});
+
 test('admin unread count tracks user messages and is cleared when viewing a conversation', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $user = User::factory()->create();
