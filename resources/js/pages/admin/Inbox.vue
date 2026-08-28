@@ -94,10 +94,14 @@ const updateConversationPreview = (message: InboxMessage) => {
 };
 
 const markConversationAsRead = (conversationId: number) => {
-    router.post(adminInboxMarkRead.url(conversationId), {}, {
-        preserveScroll: true,
-        preserveState: true,
-    });
+    router.post(
+        adminInboxMarkRead.url(conversationId),
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
 };
 
 useEcho<InboxMessage>('admin.inbox', '.MessageSent', (message) => {

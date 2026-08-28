@@ -66,8 +66,10 @@ useEcho<{ conversation_id: number; sender: { role: string } }>(
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
                         <span
-                            v-if="item.title === 'Inbox' && adminUnreadCount > 0"
-                            class="ml-auto flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] leading-5 text-destructive-foreground group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:-right-1 group-data-[collapsible=icon]:-top-1"
+                            v-if="
+                                item.title === 'Inbox' && adminUnreadCount > 0
+                            "
+                            class="ml-auto flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] leading-5 text-destructive-foreground group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:-top-1 group-data-[collapsible=icon]:-right-1"
                         >
                             {{ adminUnreadCount }}
                         </span>
