@@ -20,6 +20,7 @@ defineProps<{
         id: number;
         name: string;
         email: string;
+        password: string;
         role: string;
     }>;
 }>();
@@ -45,6 +46,7 @@ const editingId = ref<number | null>(null);
 const form = useForm({
     name: '',
     email: '',
+    password: '',
     role: 'user',
 });
 
@@ -54,6 +56,7 @@ const openCreateModal = () => {
     form.defaults({
         name: '',
         email: '',
+        password: '12345678',
         role: 'user',
     });
     form.reset();
@@ -66,6 +69,7 @@ const openEditModal = (user: any) => {
     editingId.value = user.id;
     form.name = user.name;
     form.email = user.email;
+    form.password = user.password;
     form.role = user.role;
     form.clearErrors();
     isModalOpen.value = true;
