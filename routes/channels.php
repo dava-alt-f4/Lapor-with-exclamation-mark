@@ -7,6 +7,10 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
+Broadcast::channel('admin.inbox', function ($user) {
+    return $user->role === 'admin';
+});
+
 Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
     if ($user->role === 'admin') {
         return true;

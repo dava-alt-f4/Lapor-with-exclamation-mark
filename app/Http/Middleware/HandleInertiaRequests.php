@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Message;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -41,6 +43,18 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'adminUnreadCount' => fn (): int => $request->user()?->role === 'admin'
+                ? Message::whereHas('conversation', function (Builder $query): void {
+                    $query->whereHas('user', function (Builder $userQuery): void {
+                        $userQuery->where('role', '!=', 'admin');
+                    })->where(function (Builder $readQuery): void {
+                        $readQuery->whereNull('conversations.admin_read_at')
+                            ->orWhereColumn('messages.created_at', '>', 'conversations.admin_read_at');
+                    });
+                })->whereHas('sender', function (Builder $query): void {
+                    $query->where('role', '!=', 'admin');
+                })->count()
+                : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

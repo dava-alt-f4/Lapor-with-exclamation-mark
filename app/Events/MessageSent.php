@@ -33,6 +33,7 @@ class MessageSent implements ShouldBroadcastNow
     {
         return [
             new PrivateChannel('conversation.'.$this->message->conversation_id),
+            new PrivateChannel('admin.inbox'),
         ];
     }
 

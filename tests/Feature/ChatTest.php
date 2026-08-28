@@ -2,6 +2,7 @@
 
 use App\Events\MessageSent;
 use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 
@@ -58,6 +59,79 @@ test('admin can view specific conversation', function () {
     $response = $this->actingAs($admin)->get(route('admin.inbox.show', $conversation));
 
     $response->assertOk();
+});
+
+test('admin unread count tracks user messages and is cleared when viewing a conversation', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $user = User::factory()->create();
+    $conversation = Conversation::create(['user_id' => $user->id]);
+
+    Message::create([
+        'conversation_id' => $conversation->id,
+        'sender_id' => $user->id,
+        'body' => 'Unread message',
+    ]);
+
+    Message::create([
+        'conversation_id' => $conversation->id,
+        'sender_id' => $user->id,
+        'body' => 'Second unread message',
+    ]);
+
+    $indexResponse = $this->actingAs($admin)->get(route('admin.inbox.index'));
+
+    $indexResponse->assertInertia(fn ($page) => $page
+        ->where('adminUnreadCount', 2)
+        ->where('conversations.0.unread_count', 2));
+
+    $this->actingAs($admin)->get(route('admin.inbox.show', $conversation));
+
+    expect($conversation->refresh()->admin_read_at)->not->toBeNull();
+
+    $this->actingAs($admin)->get(route('admin.inbox.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('adminUnreadCount', 0)
+            ->where('conversations.0.unread_count', 0));
+});
+
+test('a message received in the active conversation remains read after navigation', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $user = User::factory()->create();
+    $conversation = Conversation::create(['user_id' => $user->id]);
+
+    $this->actingAs($admin)->get(route('admin.inbox.show', $conversation));
+
+    $message = Message::create([
+        'conversation_id' => $conversation->id,
+        'sender_id' => $user->id,
+        'body' => 'Received while active',
+    ]);
+
+    $this->actingAs($admin)->post(route('admin.inbox.mark-read', $conversation));
+
+    expect($conversation->refresh()->admin_read_at->equalTo($message->created_at))->toBeTrue();
+
+    $this->actingAs($admin)->get(route('admin.inbox.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('adminUnreadCount', 0)
+            ->where('conversations.0.unread_count', 0));
+});
+
+test('admin replies do not increase unread count', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $user = User::factory()->create();
+    $conversation = Conversation::create(['user_id' => $user->id]);
+
+    Message::create([
+        'conversation_id' => $conversation->id,
+        'sender_id' => $admin->id,
+        'body' => 'Admin message',
+    ]);
+
+    $this->actingAs($admin)->get(route('admin.inbox.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('adminUnreadCount', 0)
+            ->where('conversations.0.unread_count', 0));
 });
 
 test('admin can reply to a conversation', function () {

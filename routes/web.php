@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 
     Route::get('/inbox', [InboxController::class, 'index'])->name('inbox.index');
     Route::get('/inbox/{conversation}', [InboxController::class, 'show'])->name('inbox.show');
+    Route::post('/inbox/{conversation}/read', [InboxController::class, 'markRead'])->name('inbox.mark-read');
     Route::post('/inbox/{conversation}', [InboxController::class, 'store'])->name('inbox.store');
 });
 

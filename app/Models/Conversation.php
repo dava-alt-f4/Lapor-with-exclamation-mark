@@ -8,7 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Conversation extends Model
 {
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id', 'admin_read_at'];
+
+    protected function casts(): array
+    {
+        return [
+            'admin_read_at' => 'datetime',
+        ];
+    }
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

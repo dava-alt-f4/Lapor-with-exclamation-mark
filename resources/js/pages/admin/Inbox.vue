@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
-import { echo } from '@laravel/echo-vue';
+import { Head, router, useForm, usePage, Link } from '@inertiajs/vue3';
+import { echo, useEcho } from '@laravel/echo-vue';
 import { Send, User as UserIcon } from '@lucide/vue';
 import { ref, nextTick, onUnmounted, watch, onMounted } from 'vue';
 import { store as adminInboxStore } from '@/actions/App/Http/Controllers/Admin/InboxController';
@@ -9,13 +9,20 @@ import { Input } from '@/components/ui/input';
 import {
     index as adminInbox,
     show as adminInboxShow,
+    markRead as adminInboxMarkRead,
 } from '@/routes/admin/inbox';
 
 const props = defineProps<{
     conversations: Array<{
         id: number;
         user: { name: string; email: string };
-        messages: Array<{ body: string; created_at: string }>;
+        messages: Array<{
+            id: number;
+            body: string;
+            created_at: string;
+            sender: { role: string };
+        }>;
+        unread_count: number;
     }>;
     activeConversation?: {
         id: number;
@@ -43,11 +50,76 @@ defineOptions({
 
 const page = usePage();
 const currentUser = page.props.auth.user;
+const conversationsList = ref([...props.conversations]);
 const messagesList = ref(props.messages ? [...props.messages] : []);
 const messagesContainer = ref<HTMLElement | null>(null);
 
 const form = useForm({
     body: '',
+});
+
+type InboxMessage = {
+    id: number;
+    conversation_id: number;
+    body: string;
+    sender_id: number;
+    created_at: string;
+    sender: { name: string; role: string; avatar_url: string | null };
+};
+
+const updateConversationPreview = (message: InboxMessage) => {
+    const conversation = conversationsList.value.find(
+        (item) => item.id === message.conversation_id,
+    );
+
+    if (!conversation) {
+        return;
+    }
+
+    conversation.messages = [message];
+
+    if (
+        message.sender.role !== 'admin' &&
+        props.activeConversation?.id !== message.conversation_id
+    ) {
+        conversation.unread_count += 1;
+    }
+
+    conversationsList.value.sort((first, second) => {
+        const firstDate = first.messages[0]?.created_at ?? '';
+        const secondDate = second.messages[0]?.created_at ?? '';
+
+        return secondDate.localeCompare(firstDate);
+    });
+};
+
+const markConversationAsRead = (conversationId: number) => {
+    router.post(adminInboxMarkRead.url(conversationId), {}, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
+useEcho<InboxMessage>('admin.inbox', '.MessageSent', (message) => {
+    if (
+        !conversationsList.value
+            .find((conversation) => conversation.id === message.conversation_id)
+            ?.messages.some((item) => item.id === message.id)
+    ) {
+        updateConversationPreview(message);
+    }
+
+    if (
+        props.activeConversation?.id === message.conversation_id &&
+        !messagesList.value.some((item) => item.id === message.id)
+    ) {
+        messagesList.value.push(message);
+        scrollToBottom();
+    }
+
+    if (props.activeConversation?.id === message.conversation_id) {
+        markConversationAsRead(message.conversation_id);
+    }
 });
 
 const scrollToBottom = () => {
@@ -83,6 +155,14 @@ const teardownEchoListener = () => {
         subscribedConversationId = null;
     }
 };
+
+watch(
+    () => props.conversations,
+    (newConversations) => {
+        conversationsList.value = [...newConversations];
+    },
+    { deep: true },
+);
 
 watch(
     () => props.messages,
@@ -144,7 +224,7 @@ const submit = () => {
                     No conversations found.
                 </div>
                 <Link
-                    v-for="conv in conversations"
+                    v-for="conv in conversationsList"
                     :key="conv.id"
                     :href="adminInboxShow(conv.id)"
                     :class="[
@@ -156,16 +236,24 @@ const submit = () => {
                         <span class="text-sm font-medium">{{
                             conv.user.name
                         }}</span>
-                        <span
-                            v-if="conv.messages.length > 0"
-                            class="text-[10px] text-muted-foreground"
-                        >
-                            {{
-                                new Date(
-                                    conv.messages[0].created_at,
-                                ).toLocaleDateString()
-                            }}
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <span
+                                v-if="conv.messages.length > 0"
+                                class="text-[10px] text-muted-foreground"
+                            >
+                                {{
+                                    new Date(
+                                        conv.messages[0].created_at,
+                                    ).toLocaleDateString()
+                                }}
+                            </span>
+                            <span
+                                v-if="conv.unread_count > 0"
+                                class="flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] leading-5 text-destructive-foreground"
+                            >
+                                {{ conv.unread_count }}
+                            </span>
+                        </div>
                     </div>
                     <div class="truncate text-xs text-muted-foreground">
                         {{
