@@ -1,10 +1,9 @@
 <?php
 
+use App\Events\MessageSent;
 use App\Models\Conversation;
-use App\Models\Message;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
-use App\Events\MessageSent;
 
 test('user can view their chat dashboard', function () {
     $user = User::factory()->create();

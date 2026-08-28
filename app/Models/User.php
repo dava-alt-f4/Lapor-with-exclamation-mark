@@ -61,6 +61,8 @@ class User extends Authenticatable implements PasskeyUser
 
     /**
      * Get the user's conversation.
+     *
+     * @return HasOne<Conversation, $this>
      */
     public function conversation(): HasOne
     {

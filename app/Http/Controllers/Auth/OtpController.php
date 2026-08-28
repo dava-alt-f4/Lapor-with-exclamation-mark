@@ -102,6 +102,6 @@ class OtpController extends Controller
             ? route('admin.dashboard', absolute: false)
             : route('dashboard', absolute: false);
 
-        return redirect()->intended(route($route));
+        return redirect()->intended($route);
     }
 }

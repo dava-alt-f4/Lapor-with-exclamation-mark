@@ -6,13 +6,15 @@ use App\Events\MessageSent;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class InboxController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $conversations = Conversation::whereHas('user', function ($query) {
             $query->where('role', '!=', 'admin');
@@ -30,7 +32,7 @@ class InboxController extends Controller
         ]);
     }
 
-    public function show(Conversation $conversation)
+    public function show(Conversation $conversation): Response
     {
         $conversations = Conversation::whereHas('user', function ($query) {
             $query->where('role', '!=', 'admin');
@@ -52,7 +54,7 @@ class InboxController extends Controller
         ]);
     }
 
-    public function store(Request $request, Conversation $conversation)
+    public function store(Request $request, Conversation $conversation): RedirectResponse
     {
         $validated = $request->validate([
             'body' => 'required|string|max:1000',

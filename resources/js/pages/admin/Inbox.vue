@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
 import { echo } from '@laravel/echo-vue';
-import { ref, nextTick, onUnmounted, watch } from 'vue';
-import { index as adminInbox, show as adminInboxShow } from '@/routes/admin/inbox';
+import { Send, User as UserIcon } from '@lucide/vue';
+import { ref, nextTick, onUnmounted, watch, onMounted } from 'vue';
 import { store as adminInboxStore } from '@/actions/App/Http/Controllers/Admin/InboxController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, User as UserIcon } from '@lucide/vue';
+import {
+    index as adminInbox,
+    show as adminInboxShow,
+} from '@/routes/admin/inbox';
 
 const props = defineProps<{
     conversations: Array<{
@@ -50,7 +53,8 @@ const form = useForm({
 const scrollToBottom = () => {
     nextTick(() => {
         if (messagesContainer.value) {
-            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+            messagesContainer.value.scrollTop =
+                messagesContainer.value.scrollHeight;
         }
     });
 };
@@ -60,12 +64,16 @@ let subscribedConversationId: number | null = null;
 const setupEchoListener = (conversationId: number) => {
     const channelName = `conversation.${conversationId}`;
 
-    echo().private(channelName).listen('.MessageSent', (message: any) => {
-        if (!messagesList.value.some((item: any) => item.id === message.id)) {
-            messagesList.value.push(message);
-            scrollToBottom();
-        }
-    });
+    echo()
+        .private(channelName)
+        .listen('.MessageSent', (message: any) => {
+            if (
+                !messagesList.value.some((item: any) => item.id === message.id)
+            ) {
+                messagesList.value.push(message);
+                scrollToBottom();
+            }
+        });
     subscribedConversationId = conversationId;
 };
 
@@ -76,25 +84,36 @@ const teardownEchoListener = () => {
     }
 };
 
-watch(() => props.messages, (newMessages) => {
-    if (newMessages) {
-        messagesList.value = [...newMessages];
-        scrollToBottom();
-    }
-}, { deep: true });
+watch(
+    () => props.messages,
+    (newMessages) => {
+        if (newMessages) {
+            messagesList.value = [...newMessages];
+            scrollToBottom();
+        }
+    },
+    { deep: true },
+);
 
-watch(() => props.activeConversation?.id, (newId) => {
-    teardownEchoListener();
+watch(
+    () => props.activeConversation?.id,
+    (newId) => {
+        teardownEchoListener();
 
-    if (newId) {
-        setupEchoListener(newId);
-    }
-}, { immediate: true });
+        if (newId) {
+            setupEchoListener(newId);
+        }
+    },
+    { immediate: true },
+);
 
 onUnmounted(teardownEchoListener);
+onMounted(scrollToBottom);
 
 const submit = () => {
-    if (!form.body.trim() || !props.activeConversation) return;
+    if (!form.body.trim() || !props.activeConversation) {
+        return;
+    }
 
     form.post(adminInboxStore.url(props.activeConversation.id), {
         preserveScroll: true,
@@ -109,15 +128,19 @@ const submit = () => {
 <template>
     <Head title="Inbox" />
 
-    <div class="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar shadow-sm dark:border-sidebar-border">
-
+    <div
+        class="flex h-[calc(100vh-8rem)] overflow-hidden rounded-xl border border-sidebar-border/70 bg-sidebar shadow-sm dark:border-sidebar-border"
+    >
         <!-- Sidebar: Conversation List -->
-        <div class="w-1/3 border-r border-sidebar-border/70 flex flex-col">
-            <div class="p-4 border-b border-sidebar-border/70">
-                <h2 class="font-semibold text-lg">Conversations</h2>
+        <div class="flex w-1/3 flex-col border-r border-sidebar-border/70">
+            <div class="border-b border-sidebar-border/70 p-4">
+                <h2 class="text-lg font-semibold">Conversations</h2>
             </div>
             <div class="flex-1 overflow-y-auto">
-                <div v-if="conversations.length === 0" class="p-4 text-center text-sm text-muted-foreground">
+                <div
+                    v-if="conversations.length === 0"
+                    class="p-4 text-center text-sm text-muted-foreground"
+                >
                     No conversations found.
                 </div>
                 <Link
@@ -125,39 +148,64 @@ const submit = () => {
                     :key="conv.id"
                     :href="adminInboxShow(conv.id)"
                     :class="[
-                        'flex flex-col gap-1 border-b border-sidebar-border/70 p-4 hover:bg-muted/50 transition-colors',
-                        activeConversation?.id === conv.id ? 'bg-muted' : ''
+                        'flex flex-col gap-1 border-b border-sidebar-border/70 p-4 transition-colors hover:bg-muted/50',
+                        activeConversation?.id === conv.id ? 'bg-muted' : '',
                     ]"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="font-medium text-sm">{{ conv.user.name }}</span>
-                        <span v-if="conv.messages.length > 0" class="text-[10px] text-muted-foreground">
-                            {{ new Date(conv.messages[0].created_at).toLocaleDateString() }}
+                        <span class="text-sm font-medium">{{
+                            conv.user.name
+                        }}</span>
+                        <span
+                            v-if="conv.messages.length > 0"
+                            class="text-[10px] text-muted-foreground"
+                        >
+                            {{
+                                new Date(
+                                    conv.messages[0].created_at,
+                                ).toLocaleDateString()
+                            }}
                         </span>
                     </div>
-                    <div class="text-xs text-muted-foreground truncate">
-                        {{ conv.messages.length > 0 ? conv.messages[0].body : 'No messages' }}
+                    <div class="truncate text-xs text-muted-foreground">
+                        {{
+                            conv.messages.length > 0
+                                ? conv.messages[0].body
+                                : 'No messages'
+                        }}
                     </div>
                 </Link>
             </div>
         </div>
 
         <!-- Main: Chat Area -->
-        <div class="flex-1 flex flex-col bg-background">
+        <div class="flex flex-1 flex-col bg-background">
             <template v-if="activeConversation">
                 <!-- Chat Header -->
-                <div class="flex items-center gap-3 border-b border-sidebar-border/70 p-4 bg-sidebar">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <div
+                    class="flex items-center gap-3 border-b border-sidebar-border/70 bg-sidebar p-4"
+                >
+                    <div
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"
+                    >
                         <UserIcon class="h-5 w-5" />
                     </div>
                     <div>
-                        <h2 class="font-semibold">{{ activeConversation.user.name }}</h2>
+                        <h2 class="font-semibold">
+                            {{ activeConversation.user.name }}
+                        </h2>
                     </div>
                 </div>
 
                 <!-- Messages Area -->
-                <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
-                    <div v-if="messagesList.length === 0" class="flex h-full items-center justify-center text-muted-foreground">
+                <div
+                    ref="messagesContainer"
+                    class="flex-1 space-y-4 overflow-y-auto p-4"
+                >
+                    <div
+                        v-if="messagesList.length === 0"
+                        class="flex h-full items-center justify-center text-muted-foreground"
+                    >
                         No messages yet.
                     </div>
 
@@ -168,19 +216,23 @@ const submit = () => {
                             'flex w-max max-w-[75%] flex-col gap-1 rounded-lg px-4 py-2 text-sm',
                             message.sender_id === currentUser.id
                                 ? 'ml-auto bg-primary text-primary-foreground'
-                                : 'bg-muted'
+                                : 'bg-muted',
                         ]"
                     >
-                        <!-- Nama pengirim sudah dihapus -->
                         <div>{{ message.body }}</div>
-                        <div class="text-[10px] opacity-50 text-right mt-1">
-                            {{ new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                        <div class="mt-1 text-right text-[10px] opacity-50">
+                            {{
+                                new Date(message.created_at).toLocaleTimeString(
+                                    [],
+                                    { hour: '2-digit', minute: '2-digit' },
+                                )
+                            }}
                         </div>
                     </div>
                 </div>
 
                 <!-- Message Input -->
-                <div class="border-t border-sidebar-border/70 p-4 bg-sidebar">
+                <div class="border-t border-sidebar-border/70 bg-sidebar p-4">
                     <form @submit.prevent="submit" class="flex gap-2">
                         <Input
                             v-model="form.body"
@@ -189,7 +241,10 @@ const submit = () => {
                             :disabled="form.processing"
                             autocomplete="off"
                         />
-                        <Button type="submit" :disabled="form.processing || !form.body.trim()">
+                        <Button
+                            type="submit"
+                            :disabled="form.processing || !form.body.trim()"
+                        >
                             <Send class="h-4 w-4" />
                             <span class="sr-only">Send</span>
                         </Button>
@@ -197,11 +252,12 @@ const submit = () => {
                 </div>
             </template>
             <template v-else>
-                <div class="flex h-full items-center justify-center text-muted-foreground">
+                <div
+                    class="flex h-full items-center justify-center text-muted-foreground"
+                >
                     Select a conversation to start messaging
                 </div>
             </template>
         </div>
-
     </div>
 </template>

@@ -14,5 +14,5 @@ Broadcast::channel('conversation.{conversationId}', function ($user, $conversati
 
     $conversation = Conversation::find($conversationId);
 
-    return $conversation && (int) $conversation->user_id === (int) $user->id;
+    return $conversation instanceof Conversation && (int) $conversation->user_id === (int) $user->id;
 });

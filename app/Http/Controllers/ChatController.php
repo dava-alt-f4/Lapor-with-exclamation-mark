@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
 use App\Models\Conversation;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ChatController extends Controller
 {
-    public function index()
+    public function index(): Response|RedirectResponse
     {
         $user = Auth::user();
 
@@ -30,7 +32,7 @@ class ChatController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'body' => 'required|string|max:1000',

@@ -11,8 +11,6 @@ use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Responses\RegisterResponse;
-use Illuminate\Support\Facades\Http;
-
 
 Route::inertia('/', 'Welcome')->name('home');
 

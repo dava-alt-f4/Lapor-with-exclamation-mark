@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { useEcho } from '@laravel/echo-vue';
+import { Send } from '@lucide/vue';
 import { ref, onMounted, nextTick, watch } from 'vue';
-import { dashboard } from '@/routes';
 import { store as chatStore } from '@/actions/App/Http/Controllers/ChatController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send } from '@lucide/vue';
+import { dashboard } from '@/routes';
 
 const props = defineProps<{
     conversation: { id: number };
@@ -42,15 +42,20 @@ const form = useForm({
 const scrollToBottom = () => {
     nextTick(() => {
         if (messagesContainer.value) {
-            messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+            messagesContainer.value.scrollTop =
+                messagesContainer.value.scrollHeight;
         }
     });
 };
 
-watch(() => props.messages, (newMessages) => {
-    messagesList.value = [...newMessages];
-    scrollToBottom();
-}, { deep: true });
+watch(
+    () => props.messages,
+    (newMessages) => {
+        messagesList.value = [...newMessages];
+        scrollToBottom();
+    },
+    { deep: true },
+);
 
 onMounted(() => {
     scrollToBottom();
@@ -62,7 +67,9 @@ useEcho(`conversation.${props.conversation.id}`, '.MessageSent', (e: any) => {
 });
 
 const submit = () => {
-    if (!form.body.trim()) return;
+    if (!form.body.trim()) {
+        return;
+    }
 
     form.post(chatStore.url(), {
         preserveScroll: true,
@@ -77,15 +84,23 @@ const submit = () => {
 <template>
     <Head title="Dashboard" />
 
-    <div class="flex h-[calc(100vh-8rem)] flex-col rounded-xl border border-sidebar-border/70 bg-sidebar shadow-sm dark:border-sidebar-border">
+    <div
+        class="flex h-[calc(100vh-8rem)] flex-col rounded-xl border border-sidebar-border/70 bg-sidebar shadow-sm dark:border-sidebar-border"
+    >
         <!-- Chat Header -->
         <div class="flex items-center border-b border-sidebar-border/70 p-4">
             <h2 class="text-lg font-semibold">Chat with Admin</h2>
         </div>
 
         <!-- Messages Area -->
-        <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
-            <div v-if="messagesList.length === 0" class="flex h-full items-center justify-center text-muted-foreground">
+        <div
+            ref="messagesContainer"
+            class="flex-1 space-y-4 overflow-y-auto p-4"
+        >
+            <div
+                v-if="messagesList.length === 0"
+                class="flex h-full items-center justify-center text-muted-foreground"
+            >
                 No messages yet. Start the conversation!
             </div>
 
@@ -96,13 +111,18 @@ const submit = () => {
                     'flex w-max max-w-[75%] flex-col gap-1 rounded-lg px-4 py-2 text-sm',
                     message.sender_id === currentUser.id
                         ? 'ml-auto bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                        : 'bg-muted',
                 ]"
             >
                 <!-- Nama pengirim sudah dihapus -->
                 <div>{{ message.body }}</div>
-                <div class="text-[10px] opacity-50 text-right mt-1">
-                    {{ new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                <div class="mt-1 text-right text-[10px] opacity-50">
+                    {{
+                        new Date(message.created_at).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        })
+                    }}
                 </div>
             </div>
         </div>
@@ -117,7 +137,10 @@ const submit = () => {
                     :disabled="form.processing"
                     autocomplete="off"
                 />
-                <Button type="submit" :disabled="form.processing || !form.body.trim()">
+                <Button
+                    type="submit"
+                    :disabled="form.processing || !form.body.trim()"
+                >
                     <Send class="h-4 w-4" />
                     <span class="sr-only">Send</span>
                 </Button>
