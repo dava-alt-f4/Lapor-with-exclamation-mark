@@ -5,10 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { dashboard } from '@/routes/admin';
 import { useInitials } from '@/composables/useInitials';
+import { dashboard } from '@/routes/admin';
 
-const props = defineProps<{
+// Cukup definisikan props, Vue otomatis menyediakan variabel 'user' di <template>
+defineProps<{
     user: {
         id: number;
         name: string;
@@ -47,7 +48,7 @@ const { getInitials } = useInitials();
         <div class="flex items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold tracking-tight">
-                    User Detail
+                    {{ user.name }} - User Detail
                 </h1>
                 <p class="text-sm text-muted-foreground">
                     View account information and address details.
@@ -62,8 +63,9 @@ const { getInitials } = useInitials();
         </div>
 
         <div
-            class="flex flex-col gap-8 rounded-xl border border-sidebar-border/70 bg-sidebar p-6 shadow-sm dark:border-sidebar-border lg:flex-row"
+            class="flex flex-col gap-8 rounded-xl border border-sidebar-border/70 bg-sidebar p-6 shadow-sm lg:flex-row dark:border-sidebar-border"
         >
+            <!-- Profile Sidebar -->
             <div
                 class="flex shrink-0 flex-col items-center gap-4 border-b border-sidebar-border/70 pb-8 lg:w-56 lg:border-r lg:border-b-0 lg:pr-8 lg:pb-0"
             >
@@ -86,24 +88,25 @@ const { getInitials } = useInitials();
                 <span
                     class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
                 >
-                    {{ user.role.toUpperCase() }}
+                    {{ user.role?.toUpperCase() }}
                 </span>
             </div>
 
+            <!-- Detail Fields -->
             <div class="grid flex-1 gap-6 md:grid-cols-2">
                 <div class="space-y-2">
                     <Label for="user-name">Name</Label>
-                    <Input id="user-name" v-model="user.name" readonly />
+                    <Input id="user-name" :model-value="user.name" readonly />
                 </div>
                 <div class="space-y-2">
                     <Label for="user-email">Email</Label>
-                    <Input id="user-email" v-model="user.email" readonly />
+                    <Input id="user-email" :model-value="user.email" readonly />
                 </div>
                 <div class="space-y-2">
                     <Label for="user-country">Country</Label>
                     <Input
                         id="user-country"
-                        v-model="user.country"
+                        :model-value="user.country || '-'"
                         readonly
                     />
                 </div>
@@ -111,7 +114,7 @@ const { getInitials } = useInitials();
                     <Label for="user-province">Province</Label>
                     <Input
                         id="user-province"
-                        v-model="user.province"
+                        :model-value="user.province || '-'"
                         readonly
                     />
                 </div>
@@ -119,7 +122,7 @@ const { getInitials } = useInitials();
                     <Label for="user-city">City</Label>
                     <Input
                         id="user-city"
-                        v-model="user.city"
+                        :model-value="user.city || '-'"
                         readonly
                     />
                 </div>
@@ -127,7 +130,7 @@ const { getInitials } = useInitials();
                     <Label for="user-district">District</Label>
                     <Input
                         id="user-district"
-                        v-model="user.district"
+                        :model-value="user.district || '-'"
                         readonly
                     />
                 </div>
