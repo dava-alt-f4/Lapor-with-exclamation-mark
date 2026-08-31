@@ -27,3 +27,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/routes/demo.php
+/resources/js/pages/Demo.vue

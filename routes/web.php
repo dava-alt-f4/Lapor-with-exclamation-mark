@@ -51,3 +51,7 @@ Route::post('/register', function (RegisterRequest $request, CreateNewUser $crea
 })->middleware(['guest', HandlePrecognitiveRequests::class])->name('register.store');
 
 require __DIR__.'/settings.php';
+
+if (app()->environment('local') && file_exists(__DIR__ . '/demo.php')) {
+    require __DIR__ . '/demo.php';
+}
