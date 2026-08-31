@@ -10,11 +10,14 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
+    DialogTrigger,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { dashboard } from '@/routes/admin';
+import DialogClose from '@/components/ui/dialog/DialogClose.vue';
 
 defineProps<{
     users: Array<{
@@ -97,9 +100,7 @@ const submit = () => {
 };
 
 const deleteUser = (id: number) => {
-    if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-        useForm({}).delete(`/admin/users/${id}`);
-    }
+    useForm({}).delete(`/admin/users/${id}`);
 };
 </script>
 
@@ -192,13 +193,41 @@ const deleteUser = (id: number) => {
                                     @click="openEditModal(user)"
                                     >Edit</Button
                                 >
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    @click="deleteUser(user.id)"
-                                    :disabled="user.id === currentUser.id"
-                                    >Delete</Button
-                                >
+                                <Dialog>
+                                    <DialogTrigger as-child>
+                                        <Button variant="destructive"
+                                            >Delete</Button
+                                        >
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>
+                                                Are you sure you want to delete
+                                                this account?
+                                            </DialogTitle>
+                                            <DialogDescription>
+                                                Once this account is deleted,
+                                                all of its resources and data
+                                                will also be permanently
+                                                deleted.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter>
+                                            <DialogClose as-child>
+                                                <Button variant="outline">
+                                                    Cancel
+                                                </Button>
+                                            </DialogClose>
+                                            <Button
+                                                type="submit"
+                                                variant="destructive"
+                                                @click="deleteUser(user.id)"
+                                            >
+                                                Delete account
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
                             </td>
                         </tr>
                     </tbody>
