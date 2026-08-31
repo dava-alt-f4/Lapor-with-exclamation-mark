@@ -38,7 +38,9 @@ class AdminController extends Controller
 
         User::create($validated);
 
-        return back()->with('success', 'User added successfully');
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('User added.')]);
+
+        return back();
     }
 
     /**
@@ -66,7 +68,9 @@ class AdminController extends Controller
 
         $user->update($validated);
 
-        return back()->with('success', 'User updated successfully');
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('User updated.')]);
+
+        return back();
     }
 
     public function destroy(User $user): RedirectResponse
@@ -77,6 +81,8 @@ class AdminController extends Controller
 
         $user->delete();
 
-        return back()->with('success', 'User deleted successfully');
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('User deleted.')]);
+
+        return back();
     }
 }
