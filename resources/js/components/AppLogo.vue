@@ -7,7 +7,7 @@ const name = usePage().props.name;
 
 <template>
     <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-background text-sidebar-background-foreground"
+        class="bg-sidebar-background text-sidebar-background-foreground flex aspect-square size-8 items-center justify-center rounded-md"
     >
         <AppLogoIcon class="size-9" />
     </div>
