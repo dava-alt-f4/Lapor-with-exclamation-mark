@@ -9,6 +9,8 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -40,4 +42,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+            $validStatuses = [403, 404, 500, 503, 419];
+            $status = $response->getStatusCode();
+
+            if (! app()->environment('testing') && ! $request->is('api/*') && in_array($status, $validStatuses)) {
+                return Inertia::render('Error', [
+                    'status' => $status,
+                ])->toResponse($request)->setStatusCode($status);
+            }
+
+            return $response;
+        });
     })->create();
