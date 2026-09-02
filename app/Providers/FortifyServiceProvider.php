@@ -130,7 +130,7 @@ class FortifyServiceProvider extends ServiceProvider
             }
             $throttleKey = Str::transliterate($request->ip());
 
-            return Limit::perHour(1)->by($throttleKey);
+            return Limit::perHour(5)->by($throttleKey);
         });
     }
 }
