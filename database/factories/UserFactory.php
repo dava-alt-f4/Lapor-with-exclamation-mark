@@ -33,6 +33,12 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'role' => 'user',
+            'country' => fake()->country(),
+            'province' => fake()->state(),
+            'city' => fake()->city(),
+            'district' => fake()->citySuffix(),
+            'avatar' => null,
         ];
     }
 
