@@ -123,5 +123,14 @@ class FortifyServiceProvider extends ServiceProvider
                 ($request->input('credential.id') ?: $request->session()->getId()).'|'.$request->ip(),
             );
         });
+
+        RateLimiter::for('register', function (Request $request) {
+            if ($request->isPrecognitive()) {
+                return Limit::none();
+            }
+            $throttleKey = Str::transliterate($request->ip());
+
+            return Limit::perHour(1)->by($throttleKey);
+        });
     }
 }

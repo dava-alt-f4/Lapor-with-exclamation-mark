@@ -2,6 +2,7 @@
 import { Head, router } from '@inertiajs/vue3';
 import { useForm } from 'laravel-precognition-vue';
 import { ref, watch, onMounted } from 'vue';
+import { toast } from 'vue-sonner';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
@@ -318,6 +319,10 @@ const submit = () => {
             form.reset('password', 'password_confirmation');
             router.visit(dashboard.url());
         },
+    }).catch((error) => {
+        if (error.response?.status === 429) {
+            toast.error('Too many request. Please try again later.');
+        }
     });
 };
 </script>
