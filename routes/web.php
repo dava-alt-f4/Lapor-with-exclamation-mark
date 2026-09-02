@@ -22,10 +22,10 @@ Route::middleware(['auth'])->group(function () {
 // Otp
 Route::middleware('guest')->group(function () {
     Route::get('/otp-login', [OtpController::class, 'showLogin'])->name('otp.login');
-    Route::post('/otp-login', [OtpController::class, 'generate']);
+    Route::post('/otp-login', [OtpController::class, 'generate'])->middleware('throttle:otp-login');
 
     Route::get('/otp-verify', [OtpController::class, 'showVerify'])->name('otp.verify');
-    Route::post('/otp-verify', [OtpController::class, 'verify']);
+    Route::post('/otp-verify', [OtpController::class, 'verify'])->middleware('throttle:otp-verify');
 });
 
 // Admin
