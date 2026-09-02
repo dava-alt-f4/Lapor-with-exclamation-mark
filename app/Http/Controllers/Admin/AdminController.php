@@ -17,10 +17,9 @@ class AdminController extends Controller
      */
     public function index(): Response
     {
-        $users = User::latest()->get();
 
         return Inertia::render('admin/Dashboard', [
-            'users' => $users,
+            'users' => User::latest()->paginate(10),
         ]);
     }
 

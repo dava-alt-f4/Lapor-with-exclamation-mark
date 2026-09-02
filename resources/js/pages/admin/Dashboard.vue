@@ -18,15 +18,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { dashboard } from '@/routes/admin';
+import Pagination from '@/components/Pagination.vue';
 
 defineProps<{
-    users: Array<{
-        id: number;
-        name: string;
-        email: string;
-        password: string;
-        role: string;
-    }>;
+    users: any;
 }>();
 
 defineOptions({
@@ -157,7 +152,7 @@ const deleteUser = (id: number) => {
                     </thead>
                     <tbody>
                         <tr
-                            v-for="user in users"
+                            v-for="user in users.data"
                             :key="user.id"
                             class="border-b border-sidebar-border/70 last:border-0"
                         >
@@ -232,6 +227,9 @@ const deleteUser = (id: number) => {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="border-t border-sidebar-border/70 p-4">
+                <Pagination :links="users.links" />
             </div>
         </div>
     </div>
