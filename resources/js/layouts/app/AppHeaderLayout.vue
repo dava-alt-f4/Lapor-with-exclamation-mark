@@ -28,6 +28,6 @@ const props = withDefaults(defineProps<Props>(), {
         <AppContent variant="header">
             <slot />
         </AppContent>
-        <Toaster />
+        <Toaster rich-colors position="top-right" />
     </AppShell>
 </template>

@@ -6,6 +6,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,9 +40,22 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Handle error 429 with toast
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            if (! $request->expectsJson() && ! app()->environment('testing')) {
+                Inertia::flash('toast', [
+                    'type' => 'error',
+                    'message' => 'Too many requests. Please try again later.',
+                ]);
+
+                return back();
+            }
+        });
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Handle custom error
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
             $validStatuses = [403, 404, 500, 503, 419];
             $status = $response->getStatusCode();

@@ -24,6 +24,6 @@ const props = withDefaults(defineProps<Props>(), {
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
             <slot />
         </AppContent>
-        <Toaster />
+        <Toaster rich-colors position="top-right" />
     </AppShell>
 </template>
