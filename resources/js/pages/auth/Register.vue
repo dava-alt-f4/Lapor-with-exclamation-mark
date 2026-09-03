@@ -73,7 +73,18 @@ const validateField = (field: Step1Field) => {
             step1Errors.value.password = 'Password is required.';
         } else if (form.password.length < 8) {
             step1Errors.value.password =
-                'Password must be at least 8 characters.';
+                'Password must contain at least 8 characters.';
+        } else if (!(
+            /[a-z]/.test(form.password) && /[A-Z]/.test(form.password)
+        )) {
+            step1Errors.value.password =
+                'Password must contain at least one uppercase and one lowercase.';
+        } else if (!/\d/.test(form.password)) {
+            step1Errors.value.password =
+                'Password must contain at least one number';
+        } else if (!/[!@#$%^&*(),.?":{}|<>_]/.test(form.password)) {
+            step1Errors.value.password =
+                'Password must contain at least one symbol';
         } else {
             step1Errors.value.password = '';
         }
@@ -261,8 +272,11 @@ const nextStep = () => {
     if (!form.password) {
         step1Errors.value.password = 'Password is required.';
         isValid = false;
-    } else if (form.password.length < 8) {
-        step1Errors.value.password = 'Password must be at least 8 characters.';
+    } else if (
+        !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(form.password)
+    ) {
+        step1Errors.value.password =
+            'Password must be at least 8 characters and contain uppercase, lowercase, numbers, and symbols.';
         isValid = false;
     }
 
@@ -712,7 +726,7 @@ const submit = () => {
                                         >Country</Label
                                     >
                                     <Input
-                                        :value="form.country"
+                                        v-model="form.country"
                                         readonly
                                         class="h-9 cursor-not-allowed bg-muted/50 text-muted-foreground"
                                     />

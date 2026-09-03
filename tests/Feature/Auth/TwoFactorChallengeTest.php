@@ -24,7 +24,7 @@ test('two factor challenge can be rendered', function () {
 
     $this->post(route('login'), [
         'email' => $user->email,
-        'password' => 'password',
+        'password' => 'Password123!',
     ]);
 
     $this->get(route('two-factor.login'))

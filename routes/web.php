@@ -48,7 +48,7 @@ Route::post('/register', function (RegisterRequest $request, CreateNewUser $crea
     Auth::login($user);
 
     return app(RegisterResponse::class);
-})->middleware(['guest', HandlePrecognitiveRequests::class, 'throttle:register'])->name('register.store');
+})->middleware(['guest', HandlePrecognitiveRequests::class])->name('register.store');
 
 require __DIR__.'/settings.php';
 

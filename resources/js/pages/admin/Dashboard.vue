@@ -55,7 +55,7 @@ const openCreateModal = () => {
     form.defaults({
         name: '',
         email: '',
-        password: '12345678',
+        password: 'Password_123',
         role: 'user',
     });
     form.reset();
