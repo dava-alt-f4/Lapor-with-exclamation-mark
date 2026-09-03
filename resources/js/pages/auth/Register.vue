@@ -726,7 +726,7 @@ const submit = () => {
                                         >Country</Label
                                     >
                                     <Input
-                                        v-model="form.country"
+                                        :model-value="form.country"
                                         readonly
                                         class="h-9 cursor-not-allowed bg-muted/50 text-muted-foreground"
                                     />
