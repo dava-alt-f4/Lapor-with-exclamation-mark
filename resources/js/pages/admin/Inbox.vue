@@ -56,6 +56,7 @@ const currentUser = page.props.auth.user;
 const conversationsList = ref([...props.conversations]);
 const messagesList = ref(props.messages ? [...props.messages] : []);
 const messagesContainer = ref<HTMLElement | null>(null);
+const inputMessage = ref<InstanceType<typeof Input> | null>(null);
 
 const search = ref(props.filters.search || '');
 let searchTimeout: ReturnType<typeof setTimeout>;
@@ -218,7 +219,10 @@ watch(
 );
 
 onUnmounted(teardownEchoListener);
-onMounted(scrollToBottom);
+onMounted(() => {
+    scrollToBottom();
+    inputMessage.value?.$el?.focus();
+});
 
 const submit = () => {
     if (!form.body.trim() || !props.activeConversation) {
@@ -230,6 +234,11 @@ const submit = () => {
         onSuccess: () => {
             form.reset();
             scrollToBottom();
+        },
+        onFinish: () => {
+            nextTick(() => {
+                inputMessage.value?.$el?.focus();
+            });
         },
     });
 };
@@ -372,6 +381,7 @@ const submit = () => {
                             class="flex-1"
                             :disabled="form.processing"
                             autocomplete="off"
+                            ref="inputMessage"
                         />
                         <Button
                             type="submit"

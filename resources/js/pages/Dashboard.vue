@@ -34,6 +34,7 @@ const page = usePage();
 const currentUser = page.props.auth.user;
 const messagesList = ref([...props.messages]);
 const messagesContainer = ref<HTMLElement | null>(null);
+const inputMessage = ref<InstanceType<typeof Input> | null>(null);
 
 const form = useForm({
     body: '',
@@ -59,6 +60,7 @@ watch(
 
 onMounted(() => {
     scrollToBottom();
+    inputMessage.value?.$el?.focus();
 });
 
 useEcho(`conversation.${props.conversation.id}`, '.MessageSent', (e: any) => {
@@ -76,6 +78,11 @@ const submit = () => {
         onSuccess: () => {
             form.reset();
             scrollToBottom();
+        },
+        onFinish: () => {
+            nextTick(() => {
+                inputMessage.value?.$el?.focus();
+            });
         },
     });
 };
@@ -136,6 +143,7 @@ const submit = () => {
                     class="flex-1"
                     :disabled="form.processing"
                     autocomplete="off"
+                    ref="inputMessage"
                 />
                 <Button
                     type="submit"
