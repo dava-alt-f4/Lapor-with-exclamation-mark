@@ -35,7 +35,7 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => null,
             'role' => 'user',
             'country' => fake()->country(),
-            'province' => fake()->state(),
+            'province' => fake()->__call('state', []),
             'city' => fake()->city(),
             'district' => fake()->citySuffix(),
             'avatar' => null,
