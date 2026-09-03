@@ -15,21 +15,26 @@ use Inertia\Response;
 
 class InboxController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $conversations = $this->conversationQuery()->get();
+        $search = $request->input('search');
+        $conversations = $this->conversationQuery($search)->get();
 
         return Inertia::render('admin/Inbox', [
             'conversations' => $conversations,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
-    public function show(Conversation $conversation): Response
+    public function show(Request $request, Conversation $conversation): Response
     {
         $this->ensureAccessibleConversation($conversation);
         $this->markConversationAsRead($conversation);
 
-        $conversations = $this->conversationQuery()->get();
+        $search = $request->input('search');
+        $conversations = $this->conversationQuery($search)->get();
 
         $messages = $conversation->messages()->with('sender')->orderBy('created_at', 'asc')->get();
 
@@ -37,6 +42,9 @@ class InboxController extends Controller
             'conversations' => $conversations,
             'activeConversation' => $conversation->load('user'),
             'messages' => $messages,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -65,10 +73,13 @@ class InboxController extends Controller
     /**
      * @return Builder<Conversation>
      */
-    private function conversationQuery(): Builder
+    private function conversationQuery(?string $search = null): Builder
     {
-        return Conversation::whereHas('user', function (Builder $query): void {
+        return Conversation::whereHas('user', function (Builder $query) use ($search): void {
             $query->where('role', '!=', 'admin');
+            if ($search) {
+                $query->where('name', 'like', "%{$search}%");
+            }
         })->with(['user', 'messages' => function ($query): void {
             $query->latest()->take(1);
         }])->withCount(['messages as unread_count' => function (Builder $query): void {

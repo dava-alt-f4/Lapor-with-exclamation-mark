@@ -15,11 +15,23 @@ class AdminController extends Controller
     /**
      * Menampilkan dashboard admin
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $search = $request->input('search');
+
+        $users = User::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('admin/Dashboard', [
-            'users' => User::latest()->paginate(10),
+            'users' => $users,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
+import { Search } from '@lucide/vue';
+import { ref, watch } from 'vue';
 import { show as adminUserShow } from '@/actions/App/Http/Controllers/Admin/AdminController';
 import InputError from '@/components/InputError.vue';
 import Pagination from '@/components/Pagination.vue';
@@ -20,8 +21,11 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { dashboard } from '@/routes/admin';
 
-defineProps<{
+const props = defineProps<{
     users: any;
+    filters: {
+        search: string | null;
+    };
 }>();
 
 defineOptions({
@@ -41,6 +45,24 @@ const currentUser = page.props.auth.user;
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const editingId = ref<number | null>(null);
+
+const search = ref(props.filters.search || '');
+let searchTimeout: ReturnType<typeof setTimeout>;
+
+watch(search, (value) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        router.get(
+            dashboard.url(),
+            { search: value },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    }, 300);
+});
 
 const form = useForm({
     name: '',
@@ -138,7 +160,20 @@ const deleteUser = (id: number) => {
                 class="flex items-center justify-between border-b border-sidebar-border/70 p-4"
             >
                 <h2 class="text-lg font-semibold">User Management</h2>
-                <Button @click="openCreateModal">Add User</Button>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <Search
+                            class="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground"
+                        />
+                        <Input
+                            v-model="search"
+                            type="search"
+                            placeholder="Search users..."
+                            class="w-64 pl-9"
+                        />
+                    </div>
+                    <Button @click="openCreateModal">Add User</Button>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
@@ -151,7 +186,16 @@ const deleteUser = (id: number) => {
                         </tr>
                     </thead>
                     <tbody>
+                        <tr v-if="users.data.length === 0">
+                            <td
+                                colspan="4"
+                                class="px-6 py-8 text-center text-muted-foreground"
+                            >
+                                No users found matching "{{ search }}".
+                            </td>
+                        </tr>
                         <tr
+                            v-else
                             v-for="user in users.data"
                             :key="user.id"
                             class="border-b border-sidebar-border/70 last:border-0"

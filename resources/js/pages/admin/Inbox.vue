@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, router, useForm, usePage, Link } from '@inertiajs/vue3';
 import { echo, useEcho } from '@laravel/echo-vue';
-import { Send, User as UserIcon } from '@lucide/vue';
+import { Send, User as UserIcon, Search } from '@lucide/vue';
 import { ref, nextTick, onUnmounted, watch, onMounted } from 'vue';
 import { store as adminInboxStore } from '@/actions/App/Http/Controllers/Admin/InboxController';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,9 @@ const props = defineProps<{
         created_at: string;
         sender: { name: string; role: string; avatar_url: string | null };
     }>;
+    filters: {
+        search: string | null;
+    };
 }>();
 
 defineOptions({
@@ -53,6 +56,26 @@ const currentUser = page.props.auth.user;
 const conversationsList = ref([...props.conversations]);
 const messagesList = ref(props.messages ? [...props.messages] : []);
 const messagesContainer = ref<HTMLElement | null>(null);
+
+const search = ref(props.filters.search || '');
+let searchTimeout: ReturnType<typeof setTimeout>;
+
+watch(search, (value) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        router.get(
+            props.activeConversation
+                ? adminInboxShow.url(props.activeConversation.id)
+                : adminInbox.url(),
+            { search: value },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    }, 300);
+});
 
 const form = useForm({
     body: '',
@@ -221,14 +244,28 @@ const submit = () => {
         <!-- Sidebar: Conversation List -->
         <div class="flex w-1/3 flex-col border-r border-sidebar-border/70">
             <div class="border-b border-sidebar-border/70 p-4">
-                <h2 class="text-lg font-semibold">Conversations</h2>
+                <h2 class="mb-4 text-lg font-semibold">Conversations</h2>
+                <div class="relative">
+                    <Search
+                        class="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground"
+                    />
+                    <Input
+                        v-model="search"
+                        type="search"
+                        placeholder="Search users..."
+                        class="w-full pl-9"
+                    />
+                </div>
             </div>
             <div class="flex-1 overflow-y-auto">
                 <div
                     v-if="conversations.length === 0"
                     class="p-4 text-center text-sm text-muted-foreground"
                 >
-                    No conversations found.
+                    <span v-if="search"
+                        >No conversations found matching "{{ search }}".</span
+                    >
+                    <span v-else>No conversations found.</span>
                 </div>
                 <Link
                     v-for="conv in conversationsList"
