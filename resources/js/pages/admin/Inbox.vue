@@ -121,7 +121,10 @@ useEcho<InboxMessage>('admin.inbox', '.MessageSent', (message) => {
         scrollToBottom();
     }
 
-    if (props.activeConversation?.id === message.conversation_id && message.sender.role !== 'admin') {
+    if (
+        props.activeConversation?.id === message.conversation_id &&
+        message.sender.role !== 'admin'
+    ) {
         markConversationAsRead(message.conversation_id);
     }
 });
