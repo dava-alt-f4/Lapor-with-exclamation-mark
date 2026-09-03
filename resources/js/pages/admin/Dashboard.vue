@@ -3,6 +3,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { show as adminUserShow } from '@/actions/App/Http/Controllers/Admin/AdminController';
 import InputError from '@/components/InputError.vue';
+import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -18,7 +19,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { dashboard } from '@/routes/admin';
-import Pagination from '@/components/Pagination.vue';
 
 defineProps<{
     users: any;
