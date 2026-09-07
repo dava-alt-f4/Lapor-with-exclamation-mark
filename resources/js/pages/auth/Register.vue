@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { useForm } from 'laravel-precognition-vue';
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { toast } from 'vue-sonner';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -24,6 +24,24 @@ defineOptions({
 });
 
 const currentStep = ref(1);
+
+const steps = [
+    { num: 1, label: 'Account' },
+    { num: 2, label: 'Address' },
+    { num: 3, label: 'Finish' },
+];
+
+const fetchRegionData = async (url: string) => {
+    try {
+        const response = await fetch(url);
+        return await response.json();
+    } catch (error) {
+        console.error(`Failed to fetch from ${url}:`, error);
+        return [];
+    }
+};
+
+const selectClass = computed(() => 'flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50');
 
 const form = useForm('post', '/register', {
     name: '',
@@ -171,14 +189,7 @@ const step2Errors = ref({
 });
 
 onMounted(async () => {
-    try {
-        const response = await fetch(
-            'https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json',
-        );
-        provinces.value = await response.json();
-    } catch (error) {
-        console.error('Failed to fetch provinces:', error);
-    }
+    provinces.value = await fetchRegionData('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json');
 });
 
 watch(selectedProvinceId, async (newId) => {
@@ -197,14 +208,7 @@ watch(selectedProvinceId, async (newId) => {
             form.province = prov.name;
         }
 
-        try {
-            const response = await fetch(
-                `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${newId}.json`,
-            );
-            cities.value = await response.json();
-        } catch (error) {
-            console.error('Failed to fetch cities:', error);
-        }
+        cities.value = await fetchRegionData(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${newId}.json`);
     } else {
         form.province = '';
     }
@@ -223,14 +227,7 @@ watch(selectedCityId, async (newId) => {
             form.city = city.name;
         }
 
-        try {
-            const response = await fetch(
-                `https://www.emsifa.com/api-wilayah-indonesia/api/districts/${newId}.json`,
-            );
-            districts.value = await response.json();
-        } catch (error) {
-            console.error('Failed to fetch districts:', error);
-        }
+        districts.value = await fetchRegionData(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${newId}.json`);
     } else {
         form.city = '';
     }
@@ -252,49 +249,23 @@ watch(selectedDistrictId, (newId) => {
 
 // Navigation & Validation
 const nextStep = () => {
-    let isValid = true;
     touched.value = {
         name: true,
         password: true,
         password_confirmation: true,
     };
-    step1Errors.value = {
-        name: '',
-        password: '',
-        password_confirmation: '',
-    };
 
-    if (!form.name.trim()) {
-        step1Errors.value.name = 'Full Name is required.';
-        isValid = false;
-    }
+    validateField('name');
+    validateField('password');
+    validateField('password_confirmation');
 
-    if (!form.password) {
-        step1Errors.value.password = 'Password is required.';
-        isValid = false;
-    } else if (
-        !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(form.password)
-    ) {
-        step1Errors.value.password =
-            'Password must be at least 8 characters and contain uppercase, lowercase, numbers, and symbols.';
-        isValid = false;
-    }
+    const hasErrors = Object.values(step1Errors.value).some(error => error !== '');
 
-    if (!form.password_confirmation) {
-        step1Errors.value.password_confirmation =
-            'Please confirm your password.';
-        isValid = false;
-    } else if (form.password !== form.password_confirmation) {
-        step1Errors.value.password_confirmation = 'Passwords do not match.';
-        isValid = false;
-    }
-
-    if (!isValid) {
+    if (hasErrors) {
         return;
     }
 
     validateEmail(() => {
-        // console.log('moving to step 2');
         currentStep.value = 2;
     }, true);
 };
@@ -364,78 +335,29 @@ const submit = () => {
                 }"
             ></div>
 
-            <!-- Step 1 -->
             <div
+                v-for="step in steps"
+                :key="step.num"
                 class="relative z-10 flex flex-col items-center gap-2 bg-background px-2"
             >
                 <div
                     class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ring-4 ring-background transition-colors duration-300"
                     :class="
-                        currentStep >= 1
+                        currentStep >= step.num
                             ? 'bg-primary text-primary-foreground'
                             : 'bg-muted text-muted-foreground'
                     "
                 >
-                    1
+                    {{ step.num }}
                 </div>
                 <span
                     class="text-xs font-medium"
                     :class="
-                        currentStep >= 1
+                        currentStep >= step.num
                             ? 'text-foreground'
                             : 'text-muted-foreground'
                     "
-                    >Account</span
-                >
-            </div>
-
-            <!-- Step 2 -->
-            <div
-                class="relative z-10 flex flex-col items-center gap-2 bg-background px-2"
-            >
-                <div
-                    class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ring-4 ring-background transition-colors duration-300"
-                    :class="
-                        currentStep >= 2
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground'
-                    "
-                >
-                    2
-                </div>
-                <span
-                    class="text-xs font-medium"
-                    :class="
-                        currentStep >= 2
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'
-                    "
-                    >Address</span
-                >
-            </div>
-
-            <!-- Step 3 -->
-            <div
-                class="relative z-10 flex flex-col items-center gap-2 bg-background px-2"
-            >
-                <div
-                    class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ring-4 ring-background transition-colors duration-300"
-                    :class="
-                        currentStep >= 3
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground'
-                    "
-                >
-                    3
-                </div>
-                <span
-                    class="text-xs font-medium"
-                    :class="
-                        currentStep >= 3
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'
-                    "
-                    >Finish</span
+                    >{{ step.label }}</span
                 >
             </div>
         </div>
@@ -572,7 +494,7 @@ const submit = () => {
                         id="province"
                         v-model="selectedProvinceId"
                         :class="[
-                            'flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                            selectClass,
                             step2Errors.province
                                 ? 'border-red-500 focus:ring-red-500'
                                 : 'border-input',
@@ -602,7 +524,7 @@ const submit = () => {
                         v-model="selectedCityId"
                         :disabled="!selectedProvinceId"
                         :class="[
-                            'flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                            selectClass,
                             step2Errors.city
                                 ? 'border-red-500 focus:ring-red-500'
                                 : 'border-input',
@@ -632,7 +554,7 @@ const submit = () => {
                         v-model="selectedDistrictId"
                         :disabled="!selectedCityId"
                         :class="[
-                            'flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                            selectClass,
                             step2Errors.district
                                 ? 'border-red-500 focus:ring-red-500'
                                 : 'border-input',
