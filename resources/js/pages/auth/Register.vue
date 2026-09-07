@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { useForm } from 'laravel-precognition-vue';
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { toast } from 'vue-sonner';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import SearchableSelect from '@/components/SearchableSelect.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,14 +35,14 @@ const steps = [
 const fetchRegionData = async (url: string) => {
     try {
         const response = await fetch(url);
+
         return await response.json();
     } catch (error) {
         console.error(`Failed to fetch from ${url}:`, error);
+
         return [];
     }
 };
-
-const selectClass = computed(() => 'flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50');
 
 const form = useForm('post', '/register', {
     name: '',
@@ -189,7 +190,9 @@ const step2Errors = ref({
 });
 
 onMounted(async () => {
-    provinces.value = await fetchRegionData('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json');
+    provinces.value = await fetchRegionData(
+        'https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json',
+    );
 });
 
 watch(selectedProvinceId, async (newId) => {
@@ -208,7 +211,9 @@ watch(selectedProvinceId, async (newId) => {
             form.province = prov.name;
         }
 
-        cities.value = await fetchRegionData(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${newId}.json`);
+        cities.value = await fetchRegionData(
+            `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${newId}.json`,
+        );
     } else {
         form.province = '';
     }
@@ -227,7 +232,9 @@ watch(selectedCityId, async (newId) => {
             form.city = city.name;
         }
 
-        districts.value = await fetchRegionData(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${newId}.json`);
+        districts.value = await fetchRegionData(
+            `https://www.emsifa.com/api-wilayah-indonesia/api/districts/${newId}.json`,
+        );
     } else {
         form.city = '';
     }
@@ -259,7 +266,9 @@ const nextStep = () => {
     validateField('password');
     validateField('password_confirmation');
 
-    const hasErrors = Object.values(step1Errors.value).some(error => error !== '');
+    const hasErrors = Object.values(step1Errors.value).some(
+        (error) => error !== '',
+    );
 
     if (hasErrors) {
         return;
@@ -490,25 +499,13 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <Label for="province">Province</Label>
-                    <select
+                    <SearchableSelect
                         id="province"
                         v-model="selectedProvinceId"
-                        :class="[
-                            selectClass,
-                            step2Errors.province
-                                ? 'border-red-500 focus:ring-red-500'
-                                : 'border-input',
-                        ]"
-                    >
-                        <option value="" disabled>Select Province</option>
-                        <option
-                            v-for="prov in provinces"
-                            :key="prov.id"
-                            :value="prov.id"
-                        >
-                            {{ prov.name }}
-                        </option>
-                    </select>
+                        :options="provinces"
+                        placeholder="Search or Select Province"
+                        :error="!!step2Errors.province"
+                    />
                     <span
                         v-if="step2Errors.province"
                         class="text-sm font-medium text-red-500"
@@ -519,26 +516,14 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <Label for="city">City / Regency</Label>
-                    <select
+                    <SearchableSelect
                         id="city"
                         v-model="selectedCityId"
+                        :options="cities"
+                        placeholder="Search or Select City/Regency"
                         :disabled="!selectedProvinceId"
-                        :class="[
-                            selectClass,
-                            step2Errors.city
-                                ? 'border-red-500 focus:ring-red-500'
-                                : 'border-input',
-                        ]"
-                    >
-                        <option value="" disabled>Select City/Regency</option>
-                        <option
-                            v-for="city in cities"
-                            :key="city.id"
-                            :value="city.id"
-                        >
-                            {{ city.name }}
-                        </option>
-                    </select>
+                        :error="!!step2Errors.city"
+                    />
                     <span
                         v-if="step2Errors.city"
                         class="text-sm font-medium text-red-500"
@@ -549,26 +534,14 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <Label for="district">District</Label>
-                    <select
+                    <SearchableSelect
                         id="district"
                         v-model="selectedDistrictId"
+                        :options="districts"
+                        placeholder="Search or Select District"
                         :disabled="!selectedCityId"
-                        :class="[
-                            selectClass,
-                            step2Errors.district
-                                ? 'border-red-500 focus:ring-red-500'
-                                : 'border-input',
-                        ]"
-                    >
-                        <option value="" disabled>Select District</option>
-                        <option
-                            v-for="dist in districts"
-                            :key="dist.id"
-                            :value="dist.id"
-                        >
-                            {{ dist.name }}
-                        </option>
-                    </select>
+                        :error="!!step2Errors.district"
+                    />
                     <span
                         v-if="step2Errors.district"
                         class="text-sm font-medium text-red-500"
