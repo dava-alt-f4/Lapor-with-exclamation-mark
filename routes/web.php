@@ -14,7 +14,7 @@ use Laravel\Fortify\Http\Responses\RegisterResponse;
 
 Route::inertia('/', 'Welcome')->name('home');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [ChatController::class, 'index'])->name('dashboard');
     Route::post('dashboard', [ChatController::class, 'store'])->name('chat.store');
 });

@@ -75,6 +75,7 @@ class OtpController extends Controller
     public function verify(Request $request): RedirectResponse
     {
         $email = session('otp_email');
+        $user = User::where('email', $email)->firstOrFail();
 
         if (! $email || ! Cache::has('otp_code_'.$email)) {
             return redirect()->route('otp.login')->withErrors(['email' => 'The OTP session is invalid or has expired. Please request a new code.']);
@@ -91,8 +92,11 @@ class OtpController extends Controller
             return back()->withErrors(['otp' => 'Invalid OTP code.']);
         }
 
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+
         // Login user
-        $user = User::where('email', $email)->firstOrFail();
         Auth::login($user);
 
         session()->forget('otp_email');
