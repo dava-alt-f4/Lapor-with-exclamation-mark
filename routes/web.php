@@ -16,7 +16,7 @@ Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [ChatController::class, 'index'])->name('dashboard');
-    Route::post('dashboard', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('dashboard', [ChatController::class, 'store'])->name('chat.store')->middleware('throttle:chat.store');
 });
 
 // Otp
