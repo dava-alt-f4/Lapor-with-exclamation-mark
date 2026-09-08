@@ -31,7 +31,8 @@ const submit = () => {
     <Head title="Verifikasi OTP" />
 
     <div class="mb-6 text-sm text-muted-foreground">
-        OTP code has been delivered to <strong class="text-primary">{{ email }}</strong
+        OTP code has been delivered to
+        <strong class="text-primary">{{ email }}</strong
         >.
     </div>
 
